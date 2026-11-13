@@ -1,0 +1,5 @@
+{
+  "camera_matrix": [[1108.5, 0, 640], [0, 1108.5, 360], [0, 0, 1]],
+  "distortion": [0, 0, 0, 0, 0],
+  "intrinsics_resolution": [1280, 720]
+}

@@ -1,0 +1,53 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.venv*/
+.pytest_cache/
+.cache/
+.tmp/
+.idea/
+.vscode/
+.env*
+
+# Acquisition and processing data
+sessions/
+calibrations/
+raw_capture_data/
+processor_data/
+processing_results/
+settings.json
+participant_history.json
+packager_settings.json
+logs/
+*.log
+*.mp4
+*.jpg
+*.jpeg
+*.csv
+*.xdf
+/schemes/*
+!/schemes/example.json
+!/schemes/example.png
+
+# Model artifacts
+/models/*
+!/models/manifest.json
+*.pt
+*.pth
+*.ts
+*.task
+*.onnx
+*.npz
+
+# Build products and local QA
+qa/
+backups/
+.packager/
+.packager_tool/
+build/
+dist/
+release*/
+*.exe
+*.dll
+*.zip
+*.whl
