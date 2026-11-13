@@ -50,7 +50,7 @@ class Main(ParticipantWorkspace, QMainWindow):
         super().__init__()
         ensure_user_data()
         configure_system_font()
-        self.setWindowTitle('眼动实验采集' if RAW_CAPTURE else '眼动实验')
+        self.setWindowTitle('QAAS-Eyetracker 纯采集' if RAW_CAPTURE else 'QAAS-Eyetracker 模型采集')
         self.setWindowIcon(QIcon(brand_pixmap(64)))
         self.resize(960, 700)
         self.setMinimumSize(720, 580)

@@ -29,7 +29,7 @@ class ParticipantWorkspace:
         outer.setSpacing(0)
         header = QHBoxLayout()
         header.setSpacing(8)
-        header.addWidget(label('ADHD 眼动采集' if RAW_CAPTURE else 'ADHD 眼动', 'HeroTitle'))
+        header.addWidget(label('QAAS-Eyetracker', 'HeroTitle'))
         header.addStretch()
         self.history_button = button('历史记录', self.open_history, quiet=True)
         self.settings_button = button('设置', self.open_settings, quiet=True)

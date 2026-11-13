@@ -1,7 +1,7 @@
 """Entry point for the PyQt6 scheme-driven eye-tracking application."""
 import os,sys,ctypes,multiprocessing,traceback
 from pathlib import Path
-from app_paths import DATA_ROOT,RESOURCE_ROOT,configure_cache_environment
+from app_paths import DATA_ROOT,RAW_CAPTURE,RESOURCE_ROOT,configure_cache_environment
 ROOT=DATA_ROOT
 configure_cache_environment()
 # Windowed executables have no attached console. Keep diagnostic output readable.
@@ -26,7 +26,8 @@ def main():
         output=Path(sys.argv[sys.argv.index('--self-check')+1])
         sys.exit(run(output))
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
-    application=QApplication(sys.argv);application.setApplicationName('ADHD眼动实验')
+    application=QApplication(sys.argv)
+    application.setApplicationName('QAAS-Eyetracker 纯采集' if RAW_CAPTURE else 'QAAS-Eyetracker 模型采集')
     from PyQt6.QtGui import QIcon
     application.setWindowIcon(QIcon(str(RESOURCE_ROOT/'assets/app.ico')))
     def exception_hook(kind,error,tb):

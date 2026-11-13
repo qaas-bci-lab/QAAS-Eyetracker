@@ -19,32 +19,41 @@ import subprocess
 import sys
 import time
 
-APP_NAME = 'ADHD眼动程序'
-APP_EXE_NAME = 'ADHD EyeTracker'
+APP_NAME = 'QAAS-Eyetracker'
+APP_EXE_NAME = APP_NAME
 INSTALLER_NAME = APP_NAME + '_安装包'
 APP_ID = '{971AAC36-AD4D-4752-B386-746221CD9711}'
 EDITIONS = {
-    'capture': dict(name=APP_NAME, display_name='ADHD 眼动实验', exe_name=APP_EXE_NAME,
-                    app_id=APP_ID, entry='app.py', directory='ADHDEyeTracker',
-                    data_name='ADHD眼动数据', data_env='ADHD_EYETRACK_DATA_DIR'),
-    'capture_cpu': dict(name='ADHD眼动程序_CPU特殊版', display_name='ADHD 眼动实验 CPU 特殊版',
-                        exe_name='ADHD EyeTracker CPU', app_id='{E27AE1E0-795B-5209-BA02-CA31CADAE85E}',
-                        entry='app.py', directory='ADHDEyeTrackerCPU',
-                        data_name='ADHD眼动数据_CPU特殊版', data_env='ADHD_EYETRACK_DATA_DIR'),
-    'capture_raw': dict(name='ADHD眼动程序_纯采集版', display_name='ADHD 眼动实验 纯采集',
-                        exe_name='ADHD EyeCapture Raw', app_id='{80972204-EE5F-4119-9906-60E5B66E03B0}',
-                        entry='raw_capture_app.py', directory='ADHDEyeCaptureRaw',
-                        data_name='ADHD眼动原始采集数据', data_env='ADHD_EYETRACK_RAW_DATA_DIR'),
-    'processor': dict(name='ADHD眼动数据处理', display_name='ADHD眼动数据处理',
-                      exe_name='ADHD EyeProcessor', app_id='{4B3D5B5F-EC9E-4B05-B2B9-0BFA939B7162}',
-                      entry='processor_app.py', directory='ADHDEyeProcessor',
-                      data_name='ADHD眼动处理数据', data_env='ADHD_EYEPROCESSOR_DATA_DIR'),
+    'capture': dict(name=APP_NAME, display_name=APP_NAME, exe_name=APP_EXE_NAME,
+                    app_id=APP_ID, entry='app.py', directory=APP_NAME,
+                    data_name='眼动追踪数据', data_env='EYE_TRACKING_DATA_DIR',
+                    legacy_title='ADHD 眼动实验', legacy_directory='ADHDEyeTracker',
+                    legacy_exe='ADHD EyeTracker'),
+    'capture_cpu': dict(name=APP_NAME + '_模型采集版', display_name=APP_NAME + ' 模型采集版',
+                        exe_name=APP_NAME + ' Model', app_id='{E27AE1E0-795B-5209-BA02-CA31CADAE85E}',
+                        entry='app.py', directory=APP_NAME + 'Model',
+                        data_name='眼动追踪采集数据', data_env='EYE_TRACKING_DATA_DIR',
+                        legacy_title='ADHD 眼动实验 CPU 特殊版', legacy_directory='ADHDEyeTrackerCPU',
+                        legacy_exe='ADHD EyeTracker CPU'),
+    'capture_raw': dict(name=APP_NAME + '_纯采集版', display_name=APP_NAME + ' 纯采集版',
+                        exe_name=APP_NAME + ' Raw', app_id='{80972204-EE5F-4119-9906-60E5B66E03B0}',
+                        entry='raw_capture_app.py', directory=APP_NAME + 'Raw',
+                        data_name='眼动追踪原始采集数据', data_env='EYE_TRACKING_RAW_DATA_DIR',
+                        legacy_title='ADHD 眼动实验 纯采集', legacy_directory='ADHDEyeCaptureRaw',
+                        legacy_exe='ADHD EyeCapture Raw'),
+    'processor': dict(name=APP_NAME + '_数据处理端', display_name=APP_NAME + ' 数据处理端',
+                      exe_name=APP_NAME + ' Processor', app_id='{4B3D5B5F-EC9E-4B05-B2B9-0BFA939B7162}',
+                      entry='processor_app.py', directory=APP_NAME + 'Processor',
+                      data_name='眼动追踪处理数据', data_env='EYE_TRACKING_PROCESSOR_DATA_DIR',
+                      legacy_title='ADHD眼动数据处理', legacy_directory='ADHDEyeProcessor',
+                      legacy_exe='ADHD EyeProcessor'),
 }
-OWNER = 'ADHD single-file builder workspace v1'
+OWNER = 'EyeTracker installer workspace v1'
+LEGACY_OWNER = 'ADHD single-file builder workspace v1'
 EXCLUDE_DIRS = {'.git', '.venv', '__pycache__', '.cache', '.tmp', '.idea',
                 'sessions', 'calibrations', 'schemes', 'backups', 'build', 'dist',
-                'release', 'release_single', 'release_installer', '安装包', 'ADHD眼动数据',
-                'ADHD眼动处理数据', 'data', 'processing_results', '.packager'}
+                'release', 'release_single', 'release_installer', '安装包', 'data',
+                'processing_results', '.packager'}
 NON_APP_MODULES = {'packager_app', 'build_tool', 'download_models', 'selftest',
                    'tracker', 'provision_bundle', 'provision_affnet'}
 
@@ -99,7 +108,7 @@ def build_lock(workspace: Path):
     workspace.mkdir(parents=True, exist_ok=True)
     owner = workspace / 'owner.txt'
     if owner.exists():
-        if owner.read_text(encoding='utf8') != OWNER:
+        if owner.read_text(encoding='utf8') not in (OWNER, LEGACY_OWNER):
             raise RuntimeError('打包工作目录标记不匹配，请选择其他输出目录。')
     else:
         # Do not claim a pre-existing directory containing somebody else's files.
@@ -132,14 +141,14 @@ def build_lock(workspace: Path):
 def reset_owned_work(workspace: Path) -> Path:
     """Delete only this tool's previous build directory after verifying ownership."""
     workspace = workspace.resolve()
-    if (workspace / 'owner.txt').read_text(encoding='utf8') != OWNER:
+    if (workspace / 'owner.txt').read_text(encoding='utf8') not in (OWNER, LEGACY_OWNER):
         raise RuntimeError('工作目录归属检查失败。')
     current = workspace / 'current'
     if current.exists():
         if current.is_symlink() or (hasattr(current, 'is_junction') and current.is_junction()) or current.resolve().parent != workspace:
             raise RuntimeError('工作目录指向了其他位置，已停止清理。')
         marker = current / 'owner.txt'
-        if not marker.is_file() or marker.read_text(encoding='utf8') != OWNER:
+        if not marker.is_file() or marker.read_text(encoding='utf8') not in (OWNER, LEGACY_OWNER):
             raise RuntimeError('旧打包目录缺少归属标记，已保留其中全部文件。')
         shutil.rmtree(current)
     current.mkdir()
@@ -152,6 +161,8 @@ def child_environment(temp_dir: Path) -> dict:
     for key in list(env):
         if key.startswith('_PYI_') or key in {
             'PYTHONHOME', 'PYTHONPATH', 'QT_PLUGIN_PATH', 'QT_QPA_PLATFORM_PLUGIN_PATH',
+            'EYE_TRACKING_EDITION', 'EYE_TRACKING_DATA_DIR', 'EYE_TRACKING_RAW_DATA_DIR',
+            'EYE_TRACKING_PROCESSOR_DATA_DIR',
             'QML2_IMPORT_PATH', 'QML_IMPORT_PATH', 'ADHD_EYETRACK_DATA_DIR',
             'ADHD_EYEPROCESSOR_DATA_DIR', 'ADHD_EYETRACK_RAW_DATA_DIR', 'ADHD_EYETRACK_EDITION',
         }:
@@ -323,8 +334,7 @@ def snapshot_project(project: Path, target: Path, edition: str = 'capture') -> d
             source = Path(sys._MEIPASS) / 'installer_resources' / name
         if source.is_file():
             shutil.copy2(source, target / 'packaging' / name)
-    write_json(target / 'installer_mode.json', {'mode': 'installed',
-                                               'edition': 'capture' if edition == 'capture_cpu' else edition,
+    write_json(target / 'installer_mode.json', {'mode': 'installed', 'edition': edition,
                                                'app_id': edition_info(edition)['app_id']})
     return {path.relative_to(target).as_posix(): sha256(path)
             for path in sorted(target.rglob('*')) if path.is_file()}
@@ -423,7 +433,9 @@ def installer_command(iscc: Path, snapshot: Path, bundle: Path, output: Path,
             '/DBuildOutputName=' + output_name, '/DBuildLanguageFile=' + str(language),
             '/DBuildAppName=' + app['display_name'], '/DBuildExeName=' + app['exe_name'],
             '/DBuildDirectory=' + app['directory'], '/DBuildDataName=' + app['data_name'],
-            '/DBuildOtherExeName=' + EDITIONS['capture_cpu' if edition == 'processor' else 'processor']['exe_name'],
+            '/DBuildLegacyAppName=' + app['legacy_title'],
+            '/DBuildLegacyDirectory=' + app['legacy_directory'],
+            '/DBuildLegacyExeName=' + app['legacy_exe'],
             '/DBuildIcon=' + str(snapshot / 'assets/app.ico'), str(template)]
 
 

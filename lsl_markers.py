@@ -5,13 +5,13 @@ import socket
 from app_paths import APP_EDITION
 
 
-STREAM_NAME = 'ADHD_EyeTracker_Markers'
+STREAM_NAME = 'EyeTracker_Markers'
 STREAM_TYPE = 'Markers'
 
 
 class MarkerOutlet:
     def __init__(self, *, source_id=None):
-        self.source_id = source_id or f'adhd-eyetracker:{socket.gethostname()}:{APP_EDITION}'
+        self.source_id = source_id or f'eyetracker:{socket.gethostname()}:{APP_EDITION}'
         self.startup_error = None
         self._outlet = None
         try:

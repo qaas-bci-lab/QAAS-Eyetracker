@@ -93,7 +93,7 @@ class ProcessorWindow(QMainWindow):
     def __init__(self, *, preferences_root=None):
         super().__init__()
         configure_system_font()
-        self.setWindowTitle('ADHD 实验数据处理')
+        self.setWindowTitle('QAAS-Eyetracker 数据处理')
         self.setWindowIcon(QIcon(str(RESOURCE_ROOT / 'assets/app.ico')))
         self.setMinimumSize(800, 560)
         self.records = []
@@ -332,7 +332,7 @@ class ProcessorWindow(QMainWindow):
         brain = ProcessorIllustration('brain')
         brain.setFixedHeight(88)
         layout.addWidget(brain)
-        layout.addWidget(label('ADHD\n实验数据处理', 'ProcessorNavBrand'))
+        layout.addWidget(label('QAAS-Eyetracker\n数据处理', 'ProcessorNavBrand'))
         layout.addSpacing(19)
         work = self.action('layers', '实验数据处理', lambda: self.tabs.setCurrentIndex(0), primary=True)
         work.setObjectName('ProcessorNavActive')
@@ -358,7 +358,7 @@ class ProcessorWindow(QMainWindow):
         title = QVBoxLayout()
         title.setSpacing(3)
         title.addWidget(label('实验数据处理', 'ProcessorTitle'))
-        self.subtitle = label('导入 ADHD 实验原始数据，进行批量处理与分析。', 'ProcessorSubtitle')
+        self.subtitle = label('导入眼动实验记录，批量生成注视坐标和回放。', 'ProcessorSubtitle')
         title.addWidget(self.subtitle)
         row.addLayout(title, 1)
         self.count_label = label('0 条记录', 'ProcessorBadge')
@@ -391,7 +391,7 @@ class ProcessorWindow(QMainWindow):
         artwork.setMinimumHeight(126)
         artwork.setMaximumHeight(230)
         layout.addWidget(artwork, 4)
-        layout.addWidget(label('ADHD 实验数据处理', 'ProcessorHeading'), alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(label('QAAS-Eyetracker 数据处理', 'ProcessorHeading'), alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addStretch(1)
         return panel
 
@@ -492,7 +492,7 @@ class ProcessorWindow(QMainWindow):
         dialog.setWindowTitle('关于')
         dialog.setMinimumWidth(360)
         layout = QVBoxLayout(dialog)
-        layout.addLayout(self.icon_heading('eye', 'ADHD 实验数据处理', 26))
+        layout.addLayout(self.icon_heading('eye', 'QAAS-Eyetracker 数据处理', 26))
         layout.addWidget(label('批量处理实验记录，查看注视点分布与回放。', 'ProcessorSubtitle', wrap=True))
         self.add_dialog_actions(layout, dialog)
         dialog.exec()

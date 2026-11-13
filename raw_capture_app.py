@@ -2,7 +2,7 @@
 import os
 import sys
 
-os.environ['ADHD_EYETRACK_EDITION'] = 'capture_raw'
+os.environ['EYE_TRACKING_EDITION'] = 'capture_raw'
 
 if __name__ == '__main__':
     if '--self-check' in sys.argv:

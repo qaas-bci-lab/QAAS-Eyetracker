@@ -59,13 +59,21 @@ def default_project() -> Path:
     nearby = tool_directory()
     if (nearby / 'app.py').is_file():
         return nearby
-    return Path('G:/ADHD眼动程序')
+    project = Path('G:/QAAS-Eyetracker')
+    return project if (project / 'app.py').is_file() else nearby
+
+
+RELEASE_EDITIONS = {
+    'capture_cpu': '模型采集版',
+    'capture_raw': '纯采集版',
+    'processor': '数据处理端',
+}
 
 
 def build_configs(project, output, selection='all', python=None):
-    if selection not in ('capture','processor','all'):
-        raise ValueError('请选择采集版、数据处理版或全部')
-    editions = ('capture','processor') if selection == 'all' else (selection,)
+    if selection not in (*RELEASE_EDITIONS, 'capture', 'all'):
+        raise ValueError('请选择模型采集版、纯采集版、数据处理端或全部')
+    editions = tuple(RELEASE_EDITIONS) if selection == 'all' else (selection,)
     return [BuildConfig(Path(project), Path(output)/edition, python, edition) for edition in editions]
 
 
@@ -139,7 +147,7 @@ class BuildWorker(QThread):
                                   self.selection,self.config.python_exe)
             results=[]
             for index, config in enumerate(configs):
-                title='采集版' if config.edition=='capture' else '数据处理版'
+                title = RELEASE_EDITIONS.get(config.edition, '采集版')
                 def progress(value, message):
                     self.progress.emit(round((index*100+value)/len(configs)), title+' '+message)
                 result = run_build(config, on_log=self.log.emit, on_progress=progress)
@@ -155,7 +163,7 @@ class BuildWorker(QThread):
 class PackagerWindow(QDialog):
     def __init__(self, project=None, output=None, config_path=None, edition=None):
         super().__init__()
-        self.setWindowTitle('眼动程序打包工具')
+        self.setWindowTitle('QAAS-Eyetracker 打包工具')
         self.resize(720, 500)
         self.setMinimumSize(620, 470)
         self.config_path = Path(config_path) if config_path else tool_directory() / 'packager_settings.json'
@@ -201,9 +209,12 @@ class PackagerWindow(QDialog):
         self.output.setAccessibleName('输出目录')
         self.edition = QComboBox()
         self.edition.setAccessibleName('打包版本')
-        for title,value in [('全部','all'),('采集版','capture'),('数据处理版','processor')]:
+        for value, title in [('all', '全部'), *RELEASE_EDITIONS.items()]:
             self.edition.addItem(title,value)
-        self.edition.setCurrentIndex(max(0,self.edition.findData(edition or saved.get('edition') or 'all')))
+        chosen_edition = edition or saved.get('edition') or 'all'
+        if chosen_edition == 'capture':
+            chosen_edition = 'capture_cpu'
+        self.edition.setCurrentIndex(max(0,self.edition.findData(chosen_edition)))
         fields.addWidget(QLabel('打包版本'))
         fields.addWidget(self.edition)
         self.project_browse = self.path_row(fields, '项目目录', self.project, self.pick_project)
@@ -347,7 +358,7 @@ class PackagerWindow(QDialog):
         self.last_result = results[-1]
         self.last_log_path = Path(results[-1].log_path)
         self.progress.setValue(100)
-        self.status.setText('两个安装包已生成' if len(results)>1 else '安装包已生成：' + str(results[0].exe_path))
+        self.status.setText(f'{len(results)} 个安装包已生成' if len(results)>1 else '安装包已生成：' + str(results[0].exe_path))
         for result in results:
             self.append_log('安装包：' + str(result.exe_path))
             self.append_log('构建清单：' + str(result.manifest_path))
@@ -392,7 +403,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='重复生成眼动程序安装包')
     parser.add_argument('--project')
     parser.add_argument('--output')
-    parser.add_argument('--edition',choices=('capture','processor','all'))
+    parser.add_argument('--edition', choices=(*RELEASE_EDITIONS, 'capture', 'all'))
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--self-check', metavar='JSON')
     mode.add_argument('--build', action='store_true', help='无界面打包并写入tool_build_result.json')
@@ -402,7 +413,7 @@ def main(argv=None):
     if args.self_check:
         os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
     application = QApplication([sys.argv[0]])
-    application.setApplicationName('ADHD打包工具')
+    application.setApplicationName('QAAS-Eyetracker 打包工具')
     configure_appearance(application)
     # A self-check never reads or writes a user's persisted builder preferences.
     config_path = Path(args.self_check).with_suffix('.unused-settings.json') if args.self_check else None
@@ -417,8 +428,8 @@ def main(argv=None):
             assert window.build_button.isEnabled()
             assert not window.build_button.icon().isNull()
             assert window.project.text() and window.output.text()
-            assert [window.edition.itemData(i) for i in range(window.edition.count())]==['all','capture','processor']
-            assert window.edition.currentData() in ('all','capture','processor')
+            assert [window.edition.itemData(i) for i in range(window.edition.count())] == ['all', *RELEASE_EDITIONS]
+            assert window.edition.currentData() in ('all', *RELEASE_EDITIONS)
             assert window.logs.isHidden() and window.logs.isReadOnly()
             assert QFontMetrics(application.font()).inFontUcs4(ord('眼'))
             target.parent.mkdir(parents=True, exist_ok=True)

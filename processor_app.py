@@ -1,6 +1,6 @@
 """Standalone entry point for experiment processing, without camera acquisition."""
 import os
-os.environ['ADHD_EYETRACK_EDITION'] = 'processor'
+os.environ['EYE_TRACKING_EDITION'] = 'processor'
 
 import ctypes
 import multiprocessing
@@ -70,7 +70,7 @@ def main():
     from processor_ui import ProcessorWindow
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
     app = QApplication(sys.argv)
-    app.setApplicationName('ADHD实验数据处理')
+    app.setApplicationName('QAAS-Eyetracker 数据处理')
     app.setWindowIcon(QIcon(str(RESOURCE_ROOT / 'assets/app.ico')))
     def exception_hook(kind, error, tb):
         traceback.print_exception(kind, error, tb)

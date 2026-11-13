@@ -6,7 +6,7 @@ def check_lsl_roundtrip():
     import pylsl
     from lsl_markers import MarkerOutlet, STREAM_NAME, STREAM_TYPE
 
-    sender = MarkerOutlet(source_id=f'adhd-diagnostic-{uuid4().hex}')
+    sender = MarkerOutlet(source_id=f'eyetracker-diagnostic-{uuid4().hex}')
     assert sender.startup_error is None, sender.startup_error
     inlet = None
     try:
